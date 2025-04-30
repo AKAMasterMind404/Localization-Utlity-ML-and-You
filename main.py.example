@@ -1,0 +1,22 @@
+import constants as cnt
+from game.ui_game import ui_game
+from report.report import DataService
+
+if __name__ == "__main__":
+    # Configuration
+    points = 100  # Runs per parameter combination
+    generate_data = False # Set to None for UI game
+
+    if generate_data is None:
+        g = ui_game(alpha=cnt.ALPHA, bot_type=cnt.CURRENT_BOT,
+                    isUseIpCells=True, is_rat_moving=cnt.IS_RAT_MOVING)
+    elif generate_data:
+        # Generate new data
+        service = DataService(isGenerateData=True, points=points)
+        service.generateDataParalelly()
+    else:
+        # Plot existing data
+        service = DataService(isGenerateData=False, points=0)
+        service.plot_combined()  # All conditions
+        service.plot_moving_rat() # Just moving rat
+        service.plot_stationary_rat() # Just stationary rat

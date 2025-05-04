@@ -21,14 +21,6 @@ def draw_grid(screen, game, n):
             else:
                 color = cnt.BLACK
 
-            if node in game.nodes_with_burning_neighbours.keys():
-                intensity = game.nodes_with_burning_neighbours[node]
-                if intensity == 1:
-                    color = cnt.ORANGE
-                elif intensity == 2:
-                    color = cnt.D1_ORANGE
-                elif intensity == 3:
-                    color = cnt.D2_ORANGE
             if node in game.one_neighbour_set:
                 color = cnt.YELLOW
             if node in game.dead_ends and game.step < 4:

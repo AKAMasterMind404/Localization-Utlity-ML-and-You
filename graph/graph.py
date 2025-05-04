@@ -22,16 +22,13 @@ class ManhattanGraph:
         self.screen = screen  # pygame.screen - May or may not be None
         self.current_step = "Ship Expansion"  # Display Label
 
-        self.currently_open = set()  # Nodes that are 'open', # Zero indicates 'open' and One indicates 'close'
-        self.dead_ends = []  # cells that have 3 closed cells around them
-        self.nodes_with_burning_neighbours = dict()  # Nodes that are adjacent to atleast one node on 'fire'
         self.open_ship_initialized = False
 
         self.step = 1  # Track algorithm step
         self.one_neighbour_set = set()  # Set of nodes with one 'open' cell, # Zero indicates 'open' and One indicates 'close'
         self.currently_open = set()  # Nodes that are 'open', # Zero indicates 'open' and One indicates 'close'
         self.multi_neighbour_set = set()  # Converse of one_neighbour_set
-        self.dead_ends = []  # cells that have 3 closed cells around them
+        self.dead_ends = list()  # cells that have 3 closed cells around them
         self.curr_bot_pos = None  # Current position of bot
         self.curr_rat_pos = None  # Current and final button position
         self.isUseIpCells = isUseIpCells  # A boolean flag indicating opened cells are already defined

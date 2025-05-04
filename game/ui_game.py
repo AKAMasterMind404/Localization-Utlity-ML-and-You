@@ -49,6 +49,11 @@ def ui_game(alpha: float, bot_type, is_rat_moving, isUseIpCells: bool = True, is
                             graph.proceed()
                             draw_grid(screen, graph, graph.n)
                             time.sleep(cnt.TIME_RATE)
+                    if graph.step == 4:
+                        while graph.step == 4:
+                            graph.proceed()
+                            draw_grid(screen, graph, graph.n)
+                            time.sleep(cnt.TIME_RATE)
                     else:
                         graph.proceed()
 

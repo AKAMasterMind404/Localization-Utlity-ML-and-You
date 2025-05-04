@@ -2,10 +2,10 @@ import networkx as nx
 import random
 import constants as cnt
 import helpers.draw_grid as dg
-from graph.sample.sample1 import currently_open_1, dead_ends_1
+from bots.robot import Robot
+from gateways.robotgateway import RobotGateway
 from helpers.draw_grid import draw_grid_internal
 from helpers.generic import HelperService
-from robot.robot import Robot
 
 
 class ManhattanGraph:
@@ -21,7 +21,6 @@ class ManhattanGraph:
         self.canProceed = True  # Indicates whether simulation is already under progress
         self.screen = screen  # pygame.screen - May or may not be None
         self.current_step = "Ship Expansion"  # Display Label
-
         self.open_ship_initialized = False
 
         self.step = 1  # Track algorithm step
@@ -30,7 +29,6 @@ class ManhattanGraph:
         self.multi_neighbour_set = set()  # Converse of one_neighbour_set
         self.dead_ends = list()  # cells that have 3 closed cells around them
         self.curr_bot_pos = None  # Current position of bot
-        self.curr_rat_pos = None  # Current and final button position
         self.isUseIpCells = isUseIpCells  # A boolean flag indicating opened cells are already defined
         self.isUsePresetPos = isUsePresetPos  # A boolean flag indicating fire, bot and button positions are already defined
         self.bot_candidate_nodes = set()  # A set of nodes that are currently open and could be the bots position
@@ -51,28 +49,16 @@ class ManhattanGraph:
         if self.open_ship_initialized:
             return
 
-        if self.isUseIpCells:
-            xCord, yCord = random.choice(list(currently_open_1))
-        else:
-            xCord = random.randint(1, self.n - 2)
-            yCord = random.randint(1, self.n - 2)
-            self.one_neighbour_set = set(HelperService.getEligibleNeighbours(self, (xCord, yCord)))
+        xCord = random.randint(1, self.n - 2)
+        yCord = random.randint(1, self.n - 2)
+
+        self.one_neighbour_set = set(HelperService.getEligibleNeighbours(self, (xCord, yCord)))
         self.currently_open.add((xCord, yCord))
         self.Ship.nodes[(xCord, yCord)]['weight'] = 0
         self.open_ship_initialized = True
         draw_grid_internal(self)
 
     def proceed(self):
-        # Everytime proceed is called, one timestep is increased.
-        # Timestep counting begins when grid is set, and bot-button-fire is initialized
-        # if self.step == 1 and self.isUseIpCells:
-        #     # Handles pre-defined graph values
-        #     self.step = 4
-        #     self.currently_open = currently_open_1
-        #     self.dead_ends = dead_ends_1
-        #     for i, j in self.dead_ends:
-        #         self.Ship.nodes[(i, j)]['weight'] = 0
-        #     return
         if self.step == 1 and self.one_neighbour_set:
             # Chose one cell to expand
             cell_to_expand = random.choice(list(self.one_neighbour_set))
@@ -120,42 +106,25 @@ class ManhattanGraph:
                 HelperService.printDebug("Dead ends not found!!")
             # Ship Generation is Complete!
             self.step = 4
+            self.curr_bot_pos = random.choice(list(self.currently_open))
             self.current_step = "Ship Generation Complete"
             draw_grid_internal(self)
         elif self.step == 4:
-            # PHASE 2
-            return
-            self.curr_bot_pos = None
-            if self.currBot.rat_probability[self.curr_rat_pos] == 0:
-                raise ValueError("Rat probability zero error")
+            if self.currBot is None:
+                self.currBot: Robot = RobotGateway(self, None, cnt.CURRENT_BOT)
 
-            if self.currBot.position == self.curr_rat_pos or self.t > cnt.MAX_MOVES_CAP:
-                # Code halt condition if too many time steps are received or if rat is found
-                self.step = 5
-                return
-
-            if self.currBot.isMove:
-                isReached = self.currBot.moveBot()
-                # Checks if bot is found whilst reaching the final target
-                if isReached:
-                    self.step = 5
-                    return
-            else:
-                # Updates ping knowledge base
-                self.currBot.updatePingLikelihoodProbabilities()
-
-            if self.is_rat_moving:
-                neighbors = HelperService.getOpenNeighbourListForNode(self, self.curr_rat_pos, isIgnoreDiagonals=True)
-                cell_to_go_rat = random.choice(neighbors)
-                self.curr_rat_pos = cell_to_go_rat
-                self.currBot.updateRatProbabilities()
-            # Increase the timestep
+            action = self.currBot.getNextAction()
+            self.currBot.update_possible_locations(action)
             self.t += 1
+
+            if self.currBot.is_localized():
+                self.game_over = True
+                print(f"Localized after {self.t} moves at location {self.currBot.possible_locations}")
+                self.step = 5  # End the localization step
+
         elif self.step == 5:
             self.game_over = True
-            return self
-        dg.draw_grid_internal(self)
-        return
+            dg.draw_grid_internal(self)
 
     def isNodeIsolated(self, node: tuple):
         x, y = node
@@ -169,11 +138,6 @@ class ManhattanGraph:
 
         if isOpenCount == 1:
             return True
-
-    def placeSpaceRat(self):
-        rat_candidates = self.currently_open.copy()
-        rat_candidates.remove(self.curr_bot_pos)
-        self.curr_rat_pos = random.choice(list(rat_candidates))
 
 
 def getGraph(screen, bot_type, alpha, is_rat_moving, isUseIpCells: bool = False, isUsePresetPos: bool = False):

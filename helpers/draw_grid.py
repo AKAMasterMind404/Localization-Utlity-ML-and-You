@@ -21,12 +21,17 @@ def draw_grid(screen, game, n):
             else:
                 color = cnt.BLACK
 
-            if node in game.one_neighbour_set:
-                color = cnt.YELLOW
-            if node in game.dead_ends and game.step < 4:
-                color = cnt.RED
-            if node in game.currently_open and (node not in game.dead_ends and game.step < 3):
-                color = cnt.GREEN
+            if game.step < 4:
+                if node in game.one_neighbour_set:
+                    color = cnt.YELLOW
+                if node in game.dead_ends:
+                    color = cnt.RED
+                if node in game.currently_open and (node not in game.dead_ends):
+                    color = cnt.GREEN
+            else:
+
+                if game.currBot and node in game.currBot.possible_locations:
+                    color = cnt.GREEN
 
             pygame.draw.rect(screen, color, (x, y, cnt.CELL_SIZE, cnt.CELL_SIZE))
             pygame.draw.rect(screen, cnt.GRAY, (x, y, cnt.CELL_SIZE, cnt.CELL_SIZE), 1)

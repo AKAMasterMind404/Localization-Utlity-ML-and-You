@@ -1,8 +1,8 @@
 import random
-from bots.robot import Robot
+from parts.localizer import Localizer
 
 
-class Bot1(Robot):
+class Part1(Localizer):
     def __init__(self, ship, position):
         super().__init__(ship, position)
         self.visited = set()

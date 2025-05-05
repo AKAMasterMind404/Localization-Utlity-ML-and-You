@@ -3,7 +3,7 @@ from graph.djikstras import compatibleGraph, djikstras, getPathFromATOB
 from helpers.generic import HelperService
 
 
-class Robot:
+class Localizer:
     def __init__(self, ship, position=None):
         self.ship = ship
         self.position = position

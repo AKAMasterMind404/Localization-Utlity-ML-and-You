@@ -1,9 +1,8 @@
 import random
-import networkx as nx
-from bots.robot import Robot
+from parts.localizer import Localizer
 
 
-class Bot2(Robot):
+class Part2(Localizer):
     def __init__(self, ship, position=None):
         super().__init__(ship, position)
         self.target = self._choose_target()

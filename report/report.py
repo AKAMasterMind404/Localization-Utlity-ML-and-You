@@ -38,7 +38,7 @@ class DataService:
         """Generate data in parallel and save to file"""
         params = [(round(a / 10, 1), b, m)
                   for a in range(11)  # 0.0 to 1.0 in 0.1 increments
-                  for b in [1, 2]  # Both bots
+                  for b in [1, 2]  # Both parts
                   for m in [True, False]  # Both movement states
                   for _ in range(self.points)]  # Number of runs
 

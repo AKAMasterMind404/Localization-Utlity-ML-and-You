@@ -2,7 +2,7 @@ import random
 from parts.localizer import Localizer
 
 
-class Part1(Localizer):
+class Localizer1(Localizer):
     def __init__(self, ship, position):
         super().__init__(ship, position)
         self.visited = set()

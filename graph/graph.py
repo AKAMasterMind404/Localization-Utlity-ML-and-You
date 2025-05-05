@@ -2,6 +2,7 @@ import networkx as nx
 import random
 import constants as cnt
 import helpers.draw_grid as dg
+from graph.sample.sample1 import dead_ends_1, currently_open_1
 from parts.localizer import Localizer
 from gateways.robotgateway import RobotGateway
 from helpers.draw_grid import draw_grid_internal
@@ -9,10 +10,9 @@ from helpers.generic import HelperService
 
 
 class ManhattanGraph:
-    def __init__(self, screen, n, alpha, bot_type, isUseIpCells: bool = False,
+    def __init__(self, screen, n, bot_type, isUseIpCells: bool = False,
                  isUsePresetPos: bool = False):
         self.n = n  # Dimension of rhe 2d graph
-        self.alpha = alpha  # Detection sensitivity
         self.bot_type = bot_type  # bot type
         self.game_over = False  # Indicates whether game may or may not be proceeded
         self.Ship = nx.Graph()  # Graph nodes represented using networkx.Graph object
@@ -31,7 +31,7 @@ class ManhattanGraph:
         self.isUseIpCells = isUseIpCells  # A boolean flag indicating opened cells are already defined
         self.isUsePresetPos = isUsePresetPos  # A boolean flag indicating fire, bot and button positions are already defined
         self.bot_candidate_nodes = set()  # A set of nodes that are currently open and could be the parts position
-        self.currPart: Localizer = None
+        self.currLocalizer: Localizer = None
         self.t = 0  # Time step, calculates how many times proceed() ahs been called. Also, a measure for no of steps taken by bot
 
     def create_manhattan_graph(self):
@@ -57,8 +57,17 @@ class ManhattanGraph:
         self.open_ship_initialized = True
         draw_grid_internal(self)
 
-    def proceed(self):
-        if self.step == 1 and self.one_neighbour_set:
+    def proceed(self, is_auto_game:bool):
+        if self.step == 1 and is_auto_game:
+            self.currently_open = currently_open_1
+            self.dead_ends = dead_ends_1
+            for i, j in self.dead_ends:
+                self.Ship.nodes[(i, j)]['weight'] = cnt.CELL_CLOSED
+            for i, j in self.currently_open:
+                self.Ship.nodes[(i, j)]['weight'] = cnt.CELL_OPENED
+            self.step = 4
+            return
+        elif self.step == 1 and self.one_neighbour_set:
             # Chose one cell to expand
             cell_to_expand = random.choice(list(self.one_neighbour_set))
             self.Ship.nodes[cell_to_expand]['weight'] = 0  # Zero indicates 'open' and One indicates 'close'
@@ -109,9 +118,9 @@ class ManhattanGraph:
             self.current_step = "Ship Generation Complete"
             draw_grid_internal(self)
         elif self.step == 4:
-            if self.currPart is None:
-                self.currPart: Localizer = RobotGateway(self, None, cnt.CURRENT_PART)
-            self.currPart.localize()
+            if self.currLocalizer is None:
+                self.currLocalizer: Localizer = RobotGateway(self, None, cnt.CURRENT_PART)
+            self.currLocalizer.localize()
         elif self.step == 5:
             self.game_over = True
             dg.draw_grid_internal(self)
@@ -130,8 +139,8 @@ class ManhattanGraph:
             return True
 
 
-def getGraph(screen, part_type, alpha, isUseIpCells: bool = False, isUsePresetPos: bool = False):
-    graph = ManhattanGraph(screen=screen, n=cnt.GRID_SIZE, alpha=alpha, bot_type=part_type,
+def getGraph(screen, part_type, isUseIpCells: bool = False, isUsePresetPos: bool = False):
+    graph = ManhattanGraph(screen=screen, n=cnt.GRID_SIZE, bot_type=part_type,
                            isUseIpCells=isUseIpCells,
                            isUsePresetPos=isUsePresetPos)
     graph.create_manhattan_graph()

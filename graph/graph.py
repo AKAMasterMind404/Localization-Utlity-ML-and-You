@@ -9,12 +9,11 @@ from helpers.generic import HelperService
 
 
 class ManhattanGraph:
-    def __init__(self, screen, n, alpha, bot_type, is_rat_moving, isUseIpCells: bool = False,
+    def __init__(self, screen, n, alpha, bot_type, isUseIpCells: bool = False,
                  isUsePresetPos: bool = False):
         self.n = n  # Dimension of rhe 2d graph
         self.alpha = alpha  # Detection sensitivity
         self.bot_type = bot_type  # bot type
-        self.is_rat_moving: bool = is_rat_moving
         self.game_over = False  # Indicates whether game may or may not be proceeded
         self.Ship = nx.Graph()  # Graph nodes represented using networkx.Graph object
         self.path = None  # Path outlined by the bot
@@ -32,7 +31,7 @@ class ManhattanGraph:
         self.isUseIpCells = isUseIpCells  # A boolean flag indicating opened cells are already defined
         self.isUsePresetPos = isUsePresetPos  # A boolean flag indicating fire, bot and button positions are already defined
         self.bot_candidate_nodes = set()  # A set of nodes that are currently open and could be the parts position
-        self.currBot: Localizer = None
+        self.currPart: Localizer = None
         self.t = 0  # Time step, calculates how many times proceed() ahs been called. Also, a measure for no of steps taken by bot
 
     def create_manhattan_graph(self):
@@ -110,10 +109,9 @@ class ManhattanGraph:
             self.current_step = "Ship Generation Complete"
             draw_grid_internal(self)
         elif self.step == 4:
-            if self.currBot is None:
-                self.currBot: Localizer = RobotGateway(self, None, cnt.CURRENT_BOT)
-            self.currBot.localize()
-
+            if self.currPart is None:
+                self.currPart: Localizer = RobotGateway(self, None, cnt.CURRENT_PART)
+            self.currPart.localize()
         elif self.step == 5:
             self.game_over = True
             dg.draw_grid_internal(self)
@@ -132,8 +130,8 @@ class ManhattanGraph:
             return True
 
 
-def getGraph(screen, bot_type, alpha, is_rat_moving, isUseIpCells: bool = False, isUsePresetPos: bool = False):
-    graph = ManhattanGraph(screen=screen, n=cnt.GRID_SIZE, alpha=alpha, bot_type=bot_type, is_rat_moving=is_rat_moving,
+def getGraph(screen, part_type, alpha, isUseIpCells: bool = False, isUsePresetPos: bool = False):
+    graph = ManhattanGraph(screen=screen, n=cnt.GRID_SIZE, alpha=alpha, bot_type=part_type,
                            isUseIpCells=isUseIpCells,
                            isUsePresetPos=isUsePresetPos)
     graph.create_manhattan_graph()

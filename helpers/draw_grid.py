@@ -30,7 +30,7 @@ def draw_grid(screen, game, n):
                     color = cnt.GREEN
             else:
 
-                if game.currBot and node in game.currBot.possible_locations:
+                if game.currPart and node in game.currPart.possible_locations:
                     color = cnt.GREEN
 
             pygame.draw.rect(screen, color, (x, y, cnt.CELL_SIZE, cnt.CELL_SIZE))

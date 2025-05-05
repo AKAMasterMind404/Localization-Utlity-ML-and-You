@@ -9,8 +9,8 @@ class Bot1(Robot):
         self.possible_locations = self.ship.currently_open.copy()
 
     def localize(self):
-        action = self.getNextAction()
-        self.updatePossibleLocations(action)
+        action = self._getNextAction()
+        self._updatePossibleLocations(action)
         self.ship.t += 1
 
         if self.isLocalized():
@@ -18,16 +18,16 @@ class Bot1(Robot):
             print(f"Localized after {self.ship.t} moves at location {self.possible_locations}")
             self.ship.step += 1
 
-    def updatePossibleLocations(self, action):
+    def _updatePossibleLocations(self, action):
         new_possible_locations = set()
 
         for loc in self.possible_locations:
-            next_loc = self.get_next_location(loc, action)
+            next_loc = self._get_next_location(loc, action)
             new_possible_locations.add(next_loc)
 
         self.possible_locations = new_possible_locations
 
-    def get_next_location(self, loc, action):
+    def _get_next_location(self, loc, action):
         x, y = loc
         potential_next = {
             'UP': (x - 1, y),
@@ -44,7 +44,7 @@ class Bot1(Robot):
         else:
             return loc
 
-    def getNextAction(self):
+    def _getNextAction(self):
         action_candidates = []
         min_len = float('inf')
 
@@ -53,7 +53,7 @@ class Bot1(Robot):
         for action in self.actions:
             new_locations = set()
             for loc in self.possible_locations:
-                next_loc = self.get_next_location(loc, action)
+                next_loc = self._get_next_location(loc, action)
                 new_locations.add(next_loc)
 
             newLocation = self._location_set_to_str(new_locations)

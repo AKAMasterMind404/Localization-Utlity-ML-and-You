@@ -112,15 +112,7 @@ class ManhattanGraph:
         elif self.step == 4:
             if self.currBot is None:
                 self.currBot: Robot = RobotGateway(self, None, cnt.CURRENT_BOT)
-
-            action = self.currBot.getNextAction()
-            self.currBot.update_possible_locations(action)
-            self.t += 1
-
-            if self.currBot.is_localized():
-                self.game_over = True
-                print(f"Localized after {self.t} moves at location {self.currBot.possible_locations}")
-                self.step = 5  # End the localization step
+            self.currBot.localize()
 
         elif self.step == 5:
             self.game_over = True

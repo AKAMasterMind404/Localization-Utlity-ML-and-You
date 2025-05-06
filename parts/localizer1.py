@@ -22,12 +22,12 @@ class Localizer1(Localizer):
         new_possible_locations = set()
 
         for loc in self.possible_locations:
-            next_loc = self._get_next_location(loc, action)
+            next_loc = self._getNextLocation(loc, action)
             new_possible_locations.add(next_loc)
 
         self.possible_locations = new_possible_locations
 
-    def _get_next_location(self, loc, action):
+    def _getNextLocation(self, loc, action):
         x, y = loc
         potential_next = {
             'UP': (x - 1, y),
@@ -53,7 +53,7 @@ class Localizer1(Localizer):
         for action in self.actions:
             new_locations = set()
             for loc in self.possible_locations:
-                next_loc = self._get_next_location(loc, action)
+                next_loc = self._getNextLocation(loc, action)
                 new_locations.add(next_loc)
 
             newLocation = self._location_set_to_str(new_locations)

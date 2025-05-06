@@ -4,7 +4,7 @@ import constants as cnt
 import helpers.draw_grid as dg
 from graph.sample.sample1 import dead_ends_1, currently_open_1
 from parts.localizer import Localizer
-from gateways.robotgateway import RobotGateway
+from gateways.robotgateway import LocalizerGateway
 from helpers.draw_grid import draw_grid_internal
 from helpers.generic import HelperService
 
@@ -28,8 +28,6 @@ class ManhattanGraph:
         self.dead_ends = list()  # cells that have 3 closed cells around them
         self.curr_bot_pos = None  # Current position of bot
         self.isUseIpCells = isUseIpCells  # A boolean flag indicating opened cells are already defined
-        self.isUsePresetPos = isUsePresetPos  # A boolean flag indicating fire, bot and button positions are already defined
-        self.bot_candidate_nodes = set()  # A set of nodes that are currently open and could be the parts position
         self.currLocalizer: Localizer = None
         self.t = 0  # Time step, calculates how many times proceed() ahs been called. Also, a measure for no of steps taken by bot
 
@@ -118,7 +116,7 @@ class ManhattanGraph:
             draw_grid_internal(self)
         elif self.step == 4:
             if self.currLocalizer is None:
-                self.currLocalizer: Localizer = RobotGateway(self, None, cnt.CURRENT_PART)
+                self.currLocalizer: Localizer = LocalizerGateway(self, None, cnt.CURRENT_PART)
             self.currLocalizer.localize()
         elif self.step == 5:
             self.game_over = True

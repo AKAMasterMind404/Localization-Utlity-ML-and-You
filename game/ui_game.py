@@ -5,7 +5,7 @@ import graph.graph as g
 from helpers.draw_grid import draw_grid
 
 
-def ui_game(part_type, isUseIpCells: bool = True, isUsePresetPos: bool = True):
+def ui_game(isUseIpCells: bool = True, isUsePresetPos: bool = True):
     pygame.init()
 
     screen_width, screen_height = 800, 800  # Default size

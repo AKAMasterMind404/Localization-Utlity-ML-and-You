@@ -1,20 +1,23 @@
 import multiprocessing
+import random
+from collections import defaultdict
 from tqdm import tqdm
-import numpy as np
-import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import constants as cnt
 from game.auto_game import auto_game
+from graph.sample.sample1 import currently_open_1
 
 
 def worker(args):
     """Standalone worker function for parallel processing"""
     try:
-        g = auto_game(bot_type=cnt.CURRENT_PART, isUseIpCells=True)
-        return f"{g.t},"
+        open_cells, L_size = args
+        L = random.sample(open_cells, L_size)
+        g = auto_game(bot_type=cnt.CURRENT_PART, isUseIpCells=False, open_cells=L)
+        return f"{L_size},{g.t}\n"
     except Exception as e:
-        print(f"Error : {str(e)}")
+        print(f"Worker error: {e}")
         return ""
 
 
@@ -27,52 +30,52 @@ class DataService:
         """
         self.points = points
         self.isGenerateData = isGenerateData
-
-        # Initialize empty dataframe
         self.df = pd.DataFrame(columns=['timesteps', 'alpha', 'bot_number', 'is_rat_moving'])
 
-    def generateDataParalelly(self):
-        """Generate data in parallel and save to file"""
-        params = [() for _ in range(self.points)]  # Number of runs
+    @staticmethod
+    def generate_data(rounds = 0):
+        min_size = 20
+        max_size = 100
+        trials_per_size = 10
 
-        # Ensure data directory exists
-        os.makedirs("data", exist_ok=True)
-        file_path = os.path.join("data", "data.txt")
+        open_cells = list(currently_open_1)
+        file = open("../data/data.txt", "a+")
+        # Prepare argument list: one entry per trial
+        params = []
+        for L_size in range(min_size, max_size + 1):
+            for _ in range(trials_per_size):
+                params.append((open_cells, L_size))
 
-        # Run simulations in parallel
-        with multiprocessing.Pool() as pool, \
-                open(file_path, "a+") as f:
-
-            # Process results as they complete
+        # Launch pool
+        with multiprocessing.Pool() as pool, file:
             for result in tqdm(pool.imap(worker, params),
                                total=len(params),
-                               desc="Running simulations"):
-                if result:  # Only write successful results
-                    f.write(result)
-                    f.flush()
+                               desc="Generating part3 data"):
+                if result:
+                    file.write(result)
+                    file.flush()
 
-    def plotData(self):
-        with open("data/data.txt", "r") as f:
-            raw_data = f.read()
+        if rounds > 0:
+            DataService.generate_data(rounds-1)
 
-        step_counts = [int(x.strip()) for x in raw_data.strip().split(",") if x.strip().isdigit()]
+    @staticmethod
+    def plot_data():
+        data = defaultdict(list)
+        file = open("../data/data.txt", "r")
+        for line in file:
+            parts = line.strip().split(",")
+            L_size = int(parts[0])
+            steps = int(parts[1])
+            data[L_size].append(steps)
 
-        group_size = 100
-        num_groups = len(step_counts) // group_size
-
-        L_sizes = []
-        avg_steps = []
-
-        for i in range(num_groups):
-            group = step_counts[i * group_size:(i + 1) * group_size]
-            L_sizes.append(i + 1)
-            avg_steps.append(np.mean(group))
+        L_sizes = sorted(data.keys())
+        avg_steps = [sum(data[k]) / len(data[k]) for k in L_sizes]
 
         plt.figure(figsize=(10, 6))
-        plt.plot(L_sizes, avg_steps, marker='o')
-        plt.xlabel('|L| (Initial Uncertainty Size)')
-        plt.ylabel('Average Steps to Localize')
-        plt.title('Average Localization Steps vs |L|')
+        plt.plot(L_sizes, avg_steps, marker="o")
+        plt.xlabel("L Size")
+        plt.ylabel("Average Steps to Localize")
+        plt.title("Average Localization Steps vs Initial Uncertainty Set Size (|L|)")
         plt.grid(True)
         plt.tight_layout()
         plt.show()

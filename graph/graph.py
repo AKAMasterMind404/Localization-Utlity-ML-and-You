@@ -2,7 +2,7 @@ import networkx as nx
 import random
 import constants as cnt
 import helpers.draw_grid as dg
-from graph.sample.sample1 import dead_ends_1, currently_open_1
+from graph.sample.sample1 import currently_open_1, dead_ends_1
 from parts.localizer import Localizer
 from gateways.robotgateway import LocalizerGateway
 from helpers.draw_grid import draw_grid_internal
@@ -10,8 +10,7 @@ from helpers.generic import HelperService
 
 
 class ManhattanGraph:
-    def __init__(self, screen, n, isUseIpCells: bool = False,
-                 isUsePresetPos: bool = False):
+    def __init__(self, screen, n, isUseIpCells: bool = False):
         self.n = n  # Dimension of rhe 2d graph
         self.game_over = False  # Indicates whether game may or may not be proceeded
         self.Ship = nx.Graph()  # Graph nodes represented using networkx.Graph object
@@ -30,6 +29,7 @@ class ManhattanGraph:
         self.isUseIpCells = isUseIpCells  # A boolean flag indicating opened cells are already defined
         self.currLocalizer: Localizer = None
         self.t = 0  # Time step, calculates how many times proceed() ahs been called. Also, a measure for no of steps taken by bot
+        self.L_size = None
 
     def create_manhattan_graph(self):
         for i in range(self.n):
@@ -54,38 +54,39 @@ class ManhattanGraph:
         self.open_ship_initialized = True
         draw_grid_internal(self)
 
-    def proceed(self, is_auto_game:bool):
-        if self.step == 1 and is_auto_game:
-            self.currently_open = currently_open_1
-            self.dead_ends = dead_ends_1
-            for i, j in self.dead_ends:
-                self.Ship.nodes[(i, j)]['weight'] = cnt.CELL_CLOSED
-            for i, j in self.currently_open:
-                self.Ship.nodes[(i, j)]['weight'] = cnt.CELL_OPENED
-            self.step = 4
-            return
-        elif self.step == 1 and self.one_neighbour_set:
-            # Chose one cell to expand
-            cell_to_expand = random.choice(list(self.one_neighbour_set))
-            self.Ship.nodes[cell_to_expand]['weight'] = 0  # Zero indicates 'open' and One indicates 'close'
-            self.currently_open.add(cell_to_expand)
-            self.one_neighbour_set.remove(cell_to_expand)
-            # one_neighbour_set is a set of nodes that are surrounded by just one open cell
+    def proceed(self, is_use_ip_cells:bool):
+        if self.step == 1:
+            if is_use_ip_cells:
+                self.currently_open = currently_open_1
+                self.dead_ends = dead_ends_1
+                for i, j in self.dead_ends:
+                    self.Ship.nodes[(i, j)]['weight'] = cnt.CELL_CLOSED
+                for i, j in self.currently_open:
+                    self.Ship.nodes[(i, j)]['weight'] = cnt.CELL_OPENED
+                self.step = 4
+                return
+            else:
+                # Chose one cell to expand
+                self.initialize_ship_opening()
+                cell_to_expand = random.choice(list(self.one_neighbour_set))
+                self.Ship.nodes[cell_to_expand]['weight'] = 0  # Zero indicates 'open' and One indicates 'close'
+                self.currently_open.add(cell_to_expand)
+                self.one_neighbour_set.remove(cell_to_expand)
+                # one_neighbour_set is a set of nodes that are surrounded by just one open cell
 
-            new_candidates = HelperService.getEligibleNeighbours(self, cell_to_expand)
-            for candidate in new_candidates:
-                if candidate not in self.multi_neighbour_set:
-                    if candidate in self.one_neighbour_set:
-                        self.one_neighbour_set.remove(candidate)
-                        self.multi_neighbour_set.add(candidate)
-                    else:
-                        self.one_neighbour_set.add(candidate)
-            if not self.one_neighbour_set:
-                # We ran out of cells that we can expand into
-                self.step = 2  # Move to dead-end detection
-                self.current_step = "Identifying Dead Ends"
-            draw_grid_internal(self)
-
+                new_candidates = HelperService.getEligibleNeighbours(self, cell_to_expand)
+                for candidate in new_candidates:
+                    if candidate not in self.multi_neighbour_set:
+                        if candidate in self.one_neighbour_set:
+                            self.one_neighbour_set.remove(candidate)
+                            self.multi_neighbour_set.add(candidate)
+                        else:
+                            self.one_neighbour_set.add(candidate)
+                if not self.one_neighbour_set:
+                    # We ran out of cells that we can expand into
+                    self.step = 2  # Move to dead-end detection
+                    self.current_step = "Identifying Dead Ends"
+                draw_grid_internal(self)
         elif self.step == 2:
             HelperService.printDebug(f"Step {self.step} has begun!!")
             self.dead_ends = [node for node in self.currently_open if self.isNodeIsolated(node)]
@@ -113,6 +114,7 @@ class ManhattanGraph:
             self.step = 4
             self.curr_bot_pos = random.choice(list(self.currently_open))
             self.current_step = "Ship Generation Complete"
+            self.L_size = len(self.currently_open)
             draw_grid_internal(self)
         elif self.step == 4:
             if self.currLocalizer is None:
@@ -136,8 +138,8 @@ class ManhattanGraph:
             return True
 
 
-def getGraph(screen, isUseIpCells: bool = False, isUsePresetPos: bool = False):
-    graph = ManhattanGraph(screen=screen, n=cnt.GRID_SIZE, isUseIpCells=isUseIpCells, isUsePresetPos=isUsePresetPos)
+def getGraph(screen, isUseIpCells: bool = False):
+    graph = ManhattanGraph(screen=screen, n=cnt.GRID_SIZE, isUseIpCells=isUseIpCells)
     graph.create_manhattan_graph()
 
     return graph

@@ -10,10 +10,9 @@ from helpers.generic import HelperService
 
 
 class ManhattanGraph:
-    def __init__(self, screen, n, bot_type, isUseIpCells: bool = False,
+    def __init__(self, screen, n, isUseIpCells: bool = False,
                  isUsePresetPos: bool = False):
         self.n = n  # Dimension of rhe 2d graph
-        self.bot_type = bot_type  # bot type
         self.game_over = False  # Indicates whether game may or may not be proceeded
         self.Ship = nx.Graph()  # Graph nodes represented using networkx.Graph object
         self.path = None  # Path outlined by the bot
@@ -139,10 +138,8 @@ class ManhattanGraph:
             return True
 
 
-def getGraph(screen, part_type, isUseIpCells: bool = False, isUsePresetPos: bool = False):
-    graph = ManhattanGraph(screen=screen, n=cnt.GRID_SIZE, bot_type=part_type,
-                           isUseIpCells=isUseIpCells,
-                           isUsePresetPos=isUsePresetPos)
+def getGraph(screen, isUseIpCells: bool = False, isUsePresetPos: bool = False):
+    graph = ManhattanGraph(screen=screen, n=cnt.GRID_SIZE, isUseIpCells=isUseIpCells, isUsePresetPos=isUsePresetPos)
     graph.create_manhattan_graph()
 
     return graph

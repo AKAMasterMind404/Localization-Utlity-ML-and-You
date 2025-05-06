@@ -14,7 +14,7 @@ def ui_game(part_type, isUseIpCells: bool = True, isUsePresetPos: bool = True):
     screen = pygame.display.set_mode(cnt.SCREEN_SIZE, pygame.RESIZABLE)
     pygame.display.set_caption("The Bot is on Fire!")
 
-    graph = g.getGraph(screen, part_type, isUseIpCells, isUsePresetPos)
+    graph = g.getGraph(screen, isUseIpCells, isUsePresetPos)
     running = True
 
     # Graph lifecycle -
@@ -42,7 +42,7 @@ def ui_game(part_type, isUseIpCells: bool = True, isUsePresetPos: bool = True):
                 if cnt.SCREEN_SIZE[0] // 2 - 50 <= x <= cnt.SCREEN_SIZE[0] // 2 + 50 and cnt.SCREEN_SIZE[1] - 40 <= y <= \
                         cnt.SCREEN_SIZE[1] - 10:
                     if graph.game_over:
-                        graph = g.getGraph(screen, part_type, isUseIpCells, isUsePresetPos)
+                        graph = g.getGraph(screen, isUseIpCells, isUsePresetPos)
 
                     if graph.step == 1:
                         while graph.step == 1:

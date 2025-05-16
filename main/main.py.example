@@ -1,0 +1,10 @@
+from data.report import DataService
+
+# Main
+if __name__ == "__main__":
+    # Toggle between generating data and plotting it
+    is_generate_mode = False
+    if is_generate_mode:
+        DataService.generate_data(10)
+    else:
+        DataService.plot_data()

@@ -4,11 +4,11 @@ from parts.localizer import Localizer
 from parts.localizer1 import Localizer1  # π₀ strategy
 
 class Localizer3(Localizer):
-    def __init__(self, ship, position=None, model_path="../models/model_p0.joblib"):
+    def __init__(self, ship, position=None, model_path="../model/model1.joblib"):
         super().__init__(ship, position)
         self.possible_locations = self.ship.currently_open.copy()
         self.visited = set()
-        self.model = joblib.load(model_path)  # Load trained π₀ estimator
+        self.model = joblib.load(model_path)  # Load π₀ trained model
         self.fallback = Localizer1(ship, position)  # Fallback to π₀ after first move
         self.has_looked_ahead = False  # Track if π₁ logic has been used
 
@@ -20,7 +20,7 @@ class Localizer3(Localizer):
             return
 
         if not self.has_looked_ahead:
-            self._one_step_lookahead()
+            self._lookahead()
             self.has_looked_ahead = True
         else:
             self.fallback.possible_locations = self.possible_locations
@@ -29,7 +29,7 @@ class Localizer3(Localizer):
 
         self.ship.t += 1
 
-    def _one_step_lookahead(self):
+    def _lookahead(self):
         best_action = None
         best_predicted_cost = float('inf')
         best_new_L = None

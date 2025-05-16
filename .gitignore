@@ -3,12 +3,12 @@
 /graph/__pycache__
 /__pycache__
 constants.py
-main.py
+main/main.py
 same-graph-result/*
 variable-graph-result/*
 /graph/sample/__pycache__
 win.py
 winnability-result/*
-/report/data.txt
+/data/data.txt
 results/data.txt
 test.py

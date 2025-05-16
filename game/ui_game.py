@@ -5,7 +5,7 @@ import graph.graph as g
 from helpers.draw_grid import draw_grid
 
 
-def ui_game(alpha: float, bot_type, is_rat_moving, isUseIpCells: bool = True, isUsePresetPos: bool = True):
+def ui_game(isUseIpCells: bool = True):
     pygame.init()
 
     screen_width, screen_height = 800, 800  # Default size
@@ -14,7 +14,7 @@ def ui_game(alpha: float, bot_type, is_rat_moving, isUseIpCells: bool = True, is
     screen = pygame.display.set_mode(cnt.SCREEN_SIZE, pygame.RESIZABLE)
     pygame.display.set_caption("The Bot is on Fire!")
 
-    graph = g.getGraph(screen, bot_type, alpha, is_rat_moving, isUseIpCells, isUsePresetPos)
+    graph = g.getGraph(screen, isUseIpCells)
     running = True
 
     # Graph lifecycle -
@@ -38,19 +38,23 @@ def ui_game(alpha: float, bot_type, is_rat_moving, isUseIpCells: bool = True, is
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                graph.initialize_ship_opening()
                 if cnt.SCREEN_SIZE[0] // 2 - 50 <= x <= cnt.SCREEN_SIZE[0] // 2 + 50 and cnt.SCREEN_SIZE[1] - 40 <= y <= \
                         cnt.SCREEN_SIZE[1] - 10:
                     if graph.game_over:
-                        graph = g.getGraph(screen, bot_type, alpha, is_rat_moving, isUseIpCells, isUsePresetPos)
+                        graph = g.getGraph(screen, isUseIpCells)
 
                     if graph.step == 1:
                         while graph.step == 1:
-                            graph.proceed()
+                            graph.proceed(is_use_ip_cells=isUseIpCells)
+                            draw_grid(screen, graph, graph.n)
+                            time.sleep(cnt.TIME_RATE)
+                    if graph.step == 4:
+                        while graph.step == 4:
+                            graph.proceed(is_use_ip_cells=isUseIpCells)
                             draw_grid(screen, graph, graph.n)
                             time.sleep(cnt.TIME_RATE)
                     else:
-                        graph.proceed()
+                        graph.proceed(is_use_ip_cells=isUseIpCells)
 
         draw_grid(screen, graph, cnt.GRID_SIZE)
 
